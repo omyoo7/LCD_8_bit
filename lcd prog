@@ -1,0 +1,70 @@
+8bit
+
+ 
+
+#include<lpc214x.h>
+#define rs 8
+#define rw 9
+#define en 10
+void lcd_init();
+void lcdcmd(char);
+void lcddata(char);
+void delay(int );
+void lcdstring(char  *);
+int main()
+{
+ lcd_init(); 
+ while(1)
+ {
+  lcdcmd(0x80);
+  lcdstring("ABCDEFGHIJKLM");
+  lcdcmd(0xc0);
+  lcdstring("NOPQRSTUVWXYZ");
+  lcdcmd(0x01);
+ }
+return 0;
+}
+void lcd_init()
+{
+ IO0DIR=IO0DIR|0x7ff;
+ lcdcmd(0x38);//select 8bit 5x7 mode
+ lcdcmd(0x0E);//display on cursor on
+}
+void lcdstring(char  *x)
+{
+ while( *x != '\0')
+ {
+  lcddata(*x);
+  x++;
+ }
+}
+
+void lcddata(char x)
+{
+ IO0SET=IO0SET|x;
+ IO0SET=IO0SET|(1<<rs); 
+ IO0CLR=IO0CLR|(1<<rw); 
+ IO0SET=IO0SET|(1<<en);
+ delay(1);
+ IO0CLR=IO0CLR|(1<<en);
+ delay(2);
+ IO0CLR=IO0CLR|x;
+ 
+}
+void lcdcmd(char x)
+{
+ IO0SET=IO0SET|x;
+ IO0CLR=IO0CLR|(1<<rs);
+ IO0CLR=IO0CLR|(1<<rw); 
+ IO0SET=IO0SET|(1<<en);
+ delay(1);
+ IO0CLR=IO0CLR|(1<<en);
+ delay(2);
+ IO0CLR=IO0CLR|x;
+}
+void delay(int k)
+{
+ int i,j;
+ for(i=0;i<k;i++)
+ for(j=0;j<=59999;j++);
+}
